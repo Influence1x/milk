@@ -2238,27 +2238,31 @@
     <script src="js/listeners.js"></script>
     <script src="js/app.js"></script>
     <script src="js/features/pat.js"></script>
-        <style>
-            /* 拍一拍抖动动画 */
-            @keyframes pat-shake {
-                0%, 100% { transform: translateX(0) rotate(0deg); }
-                20% { transform: translateX(-5px) rotate(-3deg); }
-                40% { transform: translateX(5px) rotate(3deg); }
-                60% { transform: translateX(-3px) rotate(-2deg); }
-                80% { transform: translateX(3px) rotate(1deg); }
-            }
-            .pat-animate {
-                animation: pat-shake 0.4s ease-in-out;
-                transform-origin: center;
-            }
-            /* 拍一拍的系统提示文字样式 */
-            .pat-message-tip {
-                text-align: center;
-                font-size: 12px;
-                color: #888888;
-                margin: 12px 0;
-                font-style: italic;
-            }
-        </style>
+      <style>
+    /* 拍一拍抖动动画 */
+    @keyframes pat-shake {
+        0%, 100% { transform: translateX(0) rotate(0deg); }
+        20% { transform: translateX(-5px) rotate(-3deg); }
+        40% { transform: translateX(5px) rotate(3deg); }
+        60% { transform: translateX(-3px) rotate(-2deg); }
+        80% { transform: translateX(3px) rotate(1deg); }
+    }
+    .pat-animate {
+        animation: pat-shake 0.4s ease-in-out;
+        transform-origin: center;
+    }
+    /* 拍一拍的系统提示文字样式 */
+    .pat-message-tip {
+        display: block !important;       /* 变成块级元素 */
+        width: 100% !important;          /* 强制占满整行 */
+        text-align: center !important;   /* 文字居中 */
+        align-self: center !important;   /* 防止被 flex 布局挤到旁边 */
+        font-size: 12px;
+        color: #888888;
+        margin: 12px 0;
+        font-style: italic;
+        clear: both;
+    }
+</style>
 </body>
 </html>
