@@ -1,55 +1,66 @@
 // ==========================================
-// 拍一拍测试版 - 排查问题用
+// 拍一拍功能 (Pat Feature) - 终极版
 // ==========================================
 
-console.log("✅ 拍一拍脚本已加载！");
+console.log("✅ 拍一拍终极版脚本已加载！");
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 这里不限制容器，直接监听整个 document 的点击
-    document.addEventListener("click", function(e) {
-        
-        // 1. 测试点击是否生效
-        console.log("👉 你点击了页面元素:", e.target);
-        
-        // 2. 找到头像（放宽条件，只要点到了图片都算）
-        const avatarEl = e.target.closest('img, .avatar, .msg-avatar, .user-avatar'); 
-        
-        if (!avatarEl) return; 
-        
-        console.log("🎯 成功抓到头像:", avatarEl);
+    // 1. 我们已经确认了聊天容器叫 .main-chat-area
+    const chatContainer = document.querySelector('.main-chat-area'); 
+    
+    if (!chatContainer) {
+        console.error("❌ 没找到聊天容器 .main-chat-area，请检查！");
+        return;
+    }
 
-        // 播放动画
+    // 2. 监听点击
+    chatContainer.addEventListener("click", function(e) {
+        // 3. 找头像。放宽条件：点中图片，或者带有 avatar 类名的元素都算
+        const avatarEl = e.target.closest('img, .avatar, [class*="avatar"]'); 
+        if (!avatarEl) return; 
+
+        // 播放抖动动画
         avatarEl.classList.remove("pat-animate");
         void avatarEl.offsetWidth; 
         avatarEl.classList.add("pat-animate");
         setTimeout(() => avatarEl.classList.remove("pat-animate"), 400);
 
-        // 3. 判断左边右边（这里先写死，主要看能不能出字）
-        let patText = "我 拍了拍 TA (测试文案)";
+        // 4. 判断是左边还是右边
+        // 一般来说，消息列表里的左右结构，父级会有类似 right, self, me 这样的词
+        // 如果没有，那默认只要点了，就当做是拍对方（先保证能出来）
+        const isMyMessage = avatarEl.closest('.right, .self, .me') !== null;
 
-        // 4. 找聊天框插入文字
-        // 尝试找几个常见的容器，如果找不到，就插到 body 末尾
-        let chatContainer = document.querySelector('#chat-container, .chat-list, .chat-box, .message-list, .chat-content');
+        // ============ 5. 获取真实名字（重点） ============
+        // 这里我用了更聪明的找法，去页面顶部的 .header 里找带有 name 相关的元素
+        let taName = "TA";
+        let myName = "我"; 
         
-        if (!chatContainer) {
-            console.log("⚠️ 没找到聊天容器，文字将插在页面最底下");
-            chatContainer = document.body; 
+        // 去页面的 .header 区域找对方的名字 (你可以根据实际情况修改)
+        const headerTaEl = document.querySelector('.header [class*="ta-name"], .header [class*="nickname"], .header [id*="ta-name"]');
+        if (headerTaEl && headerTaEl.innerText.trim()) {
+            taName = headerTaEl.innerText.trim();
         }
 
-        // 插入消息
+        // 如果你能从 js/state.js 里找到变量，最好用下面这种写法（假设有 window.state 变量）：
+        // taName = window.state?.characterInfo?.name || taName;
+
+        // 6. 生成文案
+        let patText = "";
+        if (isMyMessage) {
+            patText = `${myName} 拍了拍 自己`;
+        } else {
+            patText = `${myName} 拍了拍 ${taName}`;
+        }
+
+        // 7. 插入消息
         const tipDiv = document.createElement("div");
-        tipDiv.className = "pat-message-tip"; 
+        tipDiv.className = "pat-message-tip"; // 对应你写的样式
         tipDiv.innerText = patText;
-        // 加个显眼的红字背景，让你能一眼看到
-        tipDiv.style.backgroundColor = "rgba(255, 0, 0, 0.2)"; 
         
+        // 把提示条插入到聊天容器的末尾
         chatContainer.appendChild(tipDiv);
         
-        // 只有不是 body 的时候才滚动
-        if(chatContainer !== document.body) {
-            chatContainer.scrollTop = chatContainer.scrollHeight; 
-        }
-        
-        console.log("✅ 拍一拍提示已插入！");
+        // 自动滚动到底部
+        chatContainer.scrollTop = chatContainer.scrollHeight; 
     });
 });
