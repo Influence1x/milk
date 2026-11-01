@@ -1,65 +1,55 @@
 // ==========================================
-// 拍一拍功能 (Pat Feature) - 适配聊天记录
+// 拍一拍测试版 - 排查问题用
 // ==========================================
 
+console.log("✅ 拍一拍脚本已加载！");
+
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. 找到装聊天记录的父容器 (⚠️ 这里可能要改，目前是尝试找常见的聊天框类名)
-    const chatContainer = document.querySelector('#chat-container, .chat-list, .chat-box, .message-list'); 
-    
-    if (!chatContainer) {
-        console.log("没有找到聊天框容器，拍一拍无法绑定");
-        return;
-    }
-
-    // 2. 监听整个聊天区域的点击事件 (事件委托)
-    chatContainer.addEventListener("click", function(e) {
+    // 这里不限制容器，直接监听整个 document 的点击
+    document.addEventListener("click", function(e) {
         
-        // 3. 判断点的到底是不是头像 (⚠️ 这里匹配了常见的头像类名)
-        // 因为你发过截图，每个消息旁边都有头像，所以我们用 closest 往上找
-        const avatarEl = e.target.closest('.avatar, .msg-avatar, .header-avatar, img'); 
+        // 1. 测试点击是否生效
+        console.log("👉 你点击了页面元素:", e.target);
         
-        if (!avatarEl) return; // 如果点的是文字或空白，就不管
+        // 2. 找到头像（放宽条件，只要点到了图片都算）
+        const avatarEl = e.target.closest('img, .avatar, .msg-avatar, .user-avatar'); 
+        
+        if (!avatarEl) return; 
+        
+        console.log("🎯 成功抓到头像:", avatarEl);
 
-        // 4. 播放抖动动画
+        // 播放动画
         avatarEl.classList.remove("pat-animate");
-        void avatarEl.offsetWidth; // 强制重排，确保动画能连续播放
+        void avatarEl.offsetWidth; 
         avatarEl.classList.add("pat-animate");
         setTimeout(() => avatarEl.classList.remove("pat-animate"), 400);
 
-        // 5. 判断点的是对方(左边)还是自己(右边)
-        // 通过找它所在的父元素类名来判断，比如消息列表通常有 .left 或者 .right
-        const isTaMessage = avatarEl.closest('.left, .ta-msg, .receive') !== null; 
-        
-        // 6. 获取昵称 (⚠️ 这里用兜底方案，去页面顶部找名字，如果找不到就用默认的)
-        let myName = "我";
-        let taName = "TA";
-        
-        // 尝试去页面顶部抓取名字（如果没有你要修改这里）
-        const taNameEl = document.querySelector('.ta-status-name, .ta-name'); 
-        if (taNameEl && taNameEl.innerText) taName = taNameEl.innerText;
+        // 3. 判断左边右边（这里先写死，主要看能不能出字）
+        let patText = "我 拍了拍 TA (测试文案)";
 
-        // 如果你能从全局变量取，也可以用：
-        // taName = window.state?.taNickname || taName;
-        // myName = window.state?.userNickname || myName;
-
-        // 7. 生成文案
-        let patText = "";
-        if (isTaMessage) {
-            patText = `${myName} 拍了拍 ${taName}`;
-        } else {
-            patText = `${myName} 拍了拍 自己`;
+        // 4. 找聊天框插入文字
+        // 尝试找几个常见的容器，如果找不到，就插到 body 末尾
+        let chatContainer = document.querySelector('#chat-container, .chat-list, .chat-box, .message-list, .chat-content');
+        
+        if (!chatContainer) {
+            console.log("⚠️ 没找到聊天容器，文字将插在页面最底下");
+            chatContainer = document.body; 
         }
 
-        // 8. 把文案插入到聊天框
+        // 插入消息
         const tipDiv = document.createElement("div");
-        tipDiv.className = "pat-message-tip"; // 这个类名对应你刚才写的 CSS
+        tipDiv.className = "pat-message-tip"; 
         tipDiv.innerText = patText;
+        // 加个显眼的红字背景，让你能一眼看到
+        tipDiv.style.backgroundColor = "rgba(255, 0, 0, 0.2)"; 
         
         chatContainer.appendChild(tipDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight; // 滚动到底部
         
-        // 如果项目里有保存聊天记录的函数，可以在这里调一下：
-        // saveChatHistory(); 
+        // 只有不是 body 的时候才滚动
+        if(chatContainer !== document.body) {
+            chatContainer.scrollTop = chatContainer.scrollHeight; 
+        }
+        
+        console.log("✅ 拍一拍提示已插入！");
     });
 });
